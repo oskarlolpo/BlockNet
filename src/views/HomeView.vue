@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
+import { globalProfile } from '../store.js'
 import HostModal from '../components/HostModal.vue'
 import ConnectModal from '../components/ConnectModal.vue'
 import PeerList from '../components/PeerList.vue'
@@ -62,6 +63,7 @@ const handleStartHost = async (config) => {
       enableGeyser: config.enableGeyser,
       geyserPort: config.geyserPort,
       enableE4mc: false,
+      hostName: globalProfile.nickname || 'Player',
     })
     console.log("start_hosting success");
     emit('host-started', config.roomPassword || null)

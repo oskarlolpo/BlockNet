@@ -84,7 +84,7 @@ async fn get_public_addr(socket: &UdpSocket) -> Option<SocketAddr> {
     for server in stun_servers {
         if let Ok(_) = socket.send_to(&req, server).await {
             let mut buf = [0u8; 1024];
-            let timeout_duration = std::time::Duration::from_millis(500);
+            let timeout_duration = std::time::Duration::from_millis(2000);
             
             if let Ok(Ok((size, _))) = tokio::time::timeout(timeout_duration, socket.recv_from(&mut buf)).await {
                 if size >= 20 && buf[0] == 0x01 && buf[1] == 0x01 { // Binding Success Response

@@ -264,6 +264,7 @@ async fn start_hosting(
     enable_geyser: Option<bool>,
     geyser_port: Option<u16>,
     enable_e4mc: Option<bool>,
+    host_name: Option<String>,
 ) -> Result<String, String> {
     let _ = std::fs::write("start_hosting_invoked.txt", "INVOKED!");
     let _ = app.emit("app-log", "Начало start_hosting...");
@@ -277,12 +278,32 @@ async fn start_hosting(
     
     let _ = app.emit("app-log", format!("run_host завершен. Порт: {}", port));
     
+    let final_room_name = room_name.unwrap_or_else(|| "My Server".into());
+    let final_host_name = host_name.unwrap_or_else(|| "Player".into());
+    let final_game_version = game_version.unwrap_or_else(|| "java".into());
+    let final_max_players: u32 = 30;
+    let has_pw = require_password.unwrap_or(false);
+    let public_join_addr = public_ip_port.clone().unwrap_or_default();
+
     let payload = serde_json::json!({
-        "room_name": room_name.unwrap_or_else(|| "My Server".into()),
+        "room_name": final_room_name,
+        "host_name": final_host_name,
+        "nickname": final_host_name,
+        "minecraft_version": final_game_version,
+        "game_version": final_game_version,
+        "version": final_game_version,
         "port": port,
         "public_ip": public_ip_port,
+        "public_join_address": public_join_addr,
         "is_quic": true,
-        "requirePassword": require_password.unwrap_or(false)
+        "has_password": has_pw,
+        "requirePassword": has_pw,
+        "max_players": final_max_players,
+        "players_max": final_max_players,
+        "maxPlayers": final_max_players,
+        "player_count": 0,
+        "playerCount": 0,
+        "slots": format!("0/{}", final_max_players)
     });
     
     let _ = app.emit("app-log", "Публикация в лобби...");
