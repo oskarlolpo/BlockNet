@@ -195,7 +195,7 @@ const startHosting = () => {
 
         <label class="checkbox-row">
           <input v-model="forceDirectMode" type="checkbox" />
-          <span>Только прямое P2P-соединение (без резервного relay-сервера)</span>
+          <span>Требовать успешный STUN (отменить хост, если нет публичного IP)</span>
         </label>
 
         <label class="checkbox-row">

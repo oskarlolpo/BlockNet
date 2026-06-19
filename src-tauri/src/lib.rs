@@ -187,9 +187,9 @@ fn start_lan_scanner(app: AppHandle, edition: String) {
 pub mod p2p;
 pub mod signaling;
 
-use tauri::State;
 use std::sync::Mutex;
-// Removed duplicate serde
+use tauri::{Manager, State};
+use async_minecraft_ping::ConnectionConfig;
 
 #[derive(Default, Serialize, Deserialize, Clone)]
 pub struct AppStatus {
@@ -201,6 +201,8 @@ pub struct AppStatus {
     pub local_game_port: Option<u16>,
     pub max_players: Option<u32>,
     pub bedrock_port: Option<u16>,
+    pub player_count: Option<u32>,
+    pub peers: Vec<serde_json::Value>,
 }
 
 pub struct AppState {
@@ -276,6 +278,12 @@ async fn start_hosting(
         }
     };
     
+    if force_direct_mode.unwrap_or(false) && public_ip_port.is_none() {
+        let err = "Ошибка STUN (Ваша сеть/VPN блокирует UDP). Без публичного IP прямое подключение невозможно.";
+        let _ = app.emit("app-log", err);
+        return Err(err.to_string());
+    }
+    
     let _ = app.emit("app-log", format!("run_host завершен. Порт: {}", port));
     
     let final_room_name = room_name.unwrap_or_else(|| "My Server".into());
@@ -324,6 +332,70 @@ async fn start_hosting(
         "public_address": public_ip_port,
         "event": "Ожидаем игроков..."
     })).unwrap_or_default());
+    
+    // Launch background task to ping the local server and update player count
+    let p_port = port.clone();
+    let app_handle = app.clone();
+    tokio::spawn(async move {
+        loop {
+            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            let current_mode = {
+                let state_lock = app_handle.state::<AppState>();
+                let st = state_lock.status.lock().unwrap();
+                st.mode.clone()
+            };
+            if current_mode != "host" {
+                break;
+            }
+
+            match ConnectionConfig::build("127.0.0.1").with_port(p_port).connect().await {
+                Ok(mut conn) => {
+                    if let Ok(resp) = conn.status().await {
+                        let online = resp.status.players.online as u32;
+                        let max = resp.status.players.max as u32;
+                        
+                        let state_lock = app_handle.state::<AppState>();
+                        let should_publish = {
+                            let mut st = state_lock.status.lock().unwrap();
+                            let old_online = st.player_count.unwrap_or(0);
+                            let old_max = st.max_players.unwrap_or(30);
+                            st.player_count = Some(online);
+                            st.max_players = Some(max);
+                            old_online != online || old_max != max
+                        };
+
+                        if should_publish {
+                            let p = serde_json::json!({
+                                "room_name": final_room_name,
+                                "host_name": final_host_name,
+                                "nickname": final_host_name,
+                                "minecraft_version": final_game_version,
+                                "game_version": final_game_version,
+                                "version": final_game_version,
+                                "port": p_port,
+                                "public_ip": public_ip_port,
+                                "public_join_address": public_join_addr,
+                                "is_quic": true,
+                                "has_password": has_pw,
+                                "requirePassword": has_pw,
+                                "max_players": max,
+                                "players_max": max,
+                                "maxPlayers": max,
+                                "player_count": online,
+                                "playerCount": online,
+                                "slots": format!("{}/{}", online, max)
+                            });
+                            let sig = &app_handle.state::<AppState>().signaling;
+                            let _ = sig.publish_event("minecraft-lobby", "host-presence", p).await;
+                        }
+                    }
+                }
+                Err(_) => {
+                    // Ignore ping errors (server might be starting up)
+                }
+            }
+        }
+    });
     
     Ok(port.to_string())
 }
@@ -413,11 +485,13 @@ pub fn run() {
                 mode: "idle".to_string(),
                 state: "idle".to_string(),
                 client_id: client_id.clone(),
-                logs: vec![],
                 public_udp_addr: None,
                 local_game_port: None,
                 max_players: None,
                 bedrock_port: None,
+                player_count: None,
+                peers: vec![],
+                logs: vec![],
             }),
             signaling: signaling::SignalingClient::new(client_id),
         })

@@ -242,7 +242,7 @@ const copyEndpoint = (text) => {
         </div>
         <p class="hero-note">
           <template v-if="isHosting">
-            Ваш сервер опубликован. Порт: <strong>{{ status?.localGamePort ?? '—' }}</strong>
+            Ваш сервер опубликован. Порт: <strong>{{ status?.local_game_port ?? '—' }}</strong>
           </template>
           <template v-else-if="isClient">
             Вы подключены к серверу.
@@ -263,25 +263,25 @@ const copyEndpoint = (text) => {
             <div>
               <h2>{{ isHosting ? 'Активная сессия (Хост)' : 'Активная сессия (Клиент)' }}</h2>
             </div>
-            <button class="ghost-button danger-button" @click="stopHosting">Остановить</button>
+            <button class="ghost-button danger-ghost-button" @click="stopHosting" style="color: var(--danger);">Остановить</button>
           </div>
 
           <!-- Host info card -->
           <div v-if="isHosting && status" class="active-host-card">
             <div class="host-info-row">
               <span>Публичный адрес</span>
-              <strong style="cursor: pointer;" @click="copyEndpoint(status.publicUdpAddr || '')">
-                {{ status.publicUdpAddr || 'Не определён (STUN failed, только relay)' }}
+              <strong style="cursor: pointer;" @click="copyEndpoint(status?.public_udp_addr || '')">
+                {{ status?.public_udp_addr || 'Не определён (Локальная сеть)' }}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               </strong>
             </div>
-            <div class="host-info-row" v-if="status.bedrockPort">
+            <div class="host-info-row" v-if="status?.bedrock_port">
               <span>Bedrock порт</span>
-              <strong>{{ status.bedrockPort }}</strong>
+              <strong>{{ status.bedrock_port }}</strong>
             </div>
             <div class="host-info-row">
               <span>Игроков</span>
-              <strong>{{ peers.length }}/{{ status.maxPlayers ?? 30 }}</strong>
+              <strong>{{ status?.player_count ?? 0 }}/{{ status?.max_players ?? 30 }}</strong>
             </div>
           </div>
 
