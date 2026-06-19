@@ -6,7 +6,7 @@ import { listen } from '@tauri-apps/api/event'
 const props = defineProps({
   isOpen: Boolean,
 })
-const emit = defineEmits(['close', 'start-host'])
+const emit = defineEmits(['close', 'start-host', 'hosting-failed'])
 
 const roomName = ref('')
 const roomTheme = ref('survival')
@@ -24,7 +24,9 @@ const portDetecting = ref(false)
 
 // Auto-detect port when modal opens
 watch(() => props.isOpen, async (open) => {
-  if (!open) { isHosting.value = false; roomName.value = ''; return }
+  // Always reset isHosting so button is not stuck when modal reopens
+  isHosting.value = false
+  if (!open) { roomName.value = ''; return }
   if (localGamePort.value === 25565 && !roomName.value) {
     await autoDetectPort()
   }

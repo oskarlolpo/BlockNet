@@ -10,7 +10,7 @@ const props = defineProps({
   status: Object,
   servers: { type: Array, default: () => [] }
 })
-const emit = defineEmits(['refresh'])
+const emit = defineEmits(['refresh', 'host-started'])
 
 const isHostModalOpen = ref(false)
 const connectModal = ref({ open: false, server: null })

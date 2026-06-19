@@ -188,7 +188,7 @@ pub async fn run_host(local_tcp_port: u16, app: tauri::AppHandle) -> Result<(u16
                 let _ = app_clone.emit("peer-connected", serde_json::json!({
                     "ip": ip_clone,
                     "location": loc,
-                    "ping": 0
+                    "rtt_ms": 0
                 }));
                 
                 // Track ping loop
@@ -203,7 +203,7 @@ pub async fn run_host(local_tcp_port: u16, app: tauri::AppHandle) -> Result<(u16
                         let ping_ms = stats.path.rtt.as_millis();
                         let _ = ping_app.emit("peer-ping-updated", serde_json::json!({
                             "ip": ping_ip,
-                            "ping": ping_ms
+                            "rtt_ms": ping_ms
                         }));
                     }
                 });
