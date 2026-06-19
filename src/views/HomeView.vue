@@ -327,7 +327,7 @@ const copyEndpoint = (text) => {
                 <div class="server-host">{{ s.host_name || s.nickname || 'Unknown' }} · {{ s.minecraft_version || s.mcVer || s.version || 'Java' }}</div>
               </div>
               <div class="server-version">{{ s.minecraft_version || s.mcVer || s.version || '—' }}</div>
-              <div class="server-players">{{ s.slots || s.players || s.playerCount || 0 }}/{{ s.players_max || s.maxPlayers || '?' }}</div>
+              <div class="server-players">{{ s.slots ? s.slots : `${s.playerCount || 0}/${s.players_max || s.maxPlayers || '?'}` }}</div>
               <template v-if="(s.client_id || s.id || s.peer_id) === status?.client_id">
                 <button class="ghost-button" disabled>Ваш хост</button>
               </template>

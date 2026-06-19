@@ -98,20 +98,25 @@ async fn get_public_addr(socket: &UdpSocket) -> Option<SocketAddr> {
                             let family = buf[i+5];
                             if family == 0x01 { // IPv4
                                 let port = u16::from_be_bytes([buf[i+6], buf[i+7]]) ^ 0x2112;
-                                let ip_bytes = [
+                                let ip = std::net::Ipv4Addr::new(
                                     buf[i+8] ^ 0x21,
                                     buf[i+9] ^ 0x12,
                                     buf[i+10] ^ 0xA4,
-                                    buf[i+11] ^ 0x42,
-                                ];
-                                return Some(SocketAddr::new(std::net::IpAddr::V4(Ipv4Addr::from(ip_bytes)), port));
+                                    buf[i+11] ^ 0x42
+                                );
+                                return Some(SocketAddr::new(std::net::IpAddr::V4(ip), port));
                             }
-                        } else if attr_type == 0x0001 && attr_len == 8 { // MAPPED-ADDRESS fallback
+                        } else if attr_type == 0x0001 && attr_len == 8 { // MAPPED-ADDRESS
                             let family = buf[i+5];
-                            if family == 0x01 {
+                            if family == 0x01 { // IPv4
                                 let port = u16::from_be_bytes([buf[i+6], buf[i+7]]);
-                                let ip_bytes = [buf[i+8], buf[i+9], buf[i+10], buf[i+11]];
-                                return Some(SocketAddr::new(std::net::IpAddr::V4(Ipv4Addr::from(ip_bytes)), port));
+                                let ip = std::net::Ipv4Addr::new(
+                                    buf[i+8],
+                                    buf[i+9],
+                                    buf[i+10],
+                                    buf[i+11]
+                                );
+                                return Some(SocketAddr::new(std::net::IpAddr::V4(ip), port));
                             }
                         }
                         i += 4 + attr_len;
