@@ -228,9 +228,7 @@ const acceptRequest = async () => {
     // 3. Для QUIC туннеля хосту больше ничего делать не нужно!
     // Quinn автоматически принимает входящие подключения на открытом UDP порту.
     addLog(`Запрос принят. Ожидание подключения от ${peerId}...`)
-    setTimeout(() => {
-      connectStatus.value = 'idle'
-    }, 5000)
+    // connectStatus timeout (no-op — state managed by get_status poll)
   } catch (e) {
     addLog('Ошибка принятия: ' + e)
   } finally {
@@ -257,7 +255,7 @@ const declineRequest = async () => {
 </script>
 
 <template>
-  <div class="app-shell" data-theme="oled">
+  <div class="app-shell">
     <Titlebar />
     <!-- Sidebar -->
     <aside class="sidebar">

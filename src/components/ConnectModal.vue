@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 
 const props = defineProps({
@@ -17,6 +17,14 @@ const handleConnect = () => {
   connecting.value = true
   emit('connect', { password: password.value })
 }
+
+// Reset state when modal closes
+watch(() => props.isOpen, (open) => {
+  if (!open) {
+    connecting.value = false
+    password.value = ''
+  }
+})
 </script>
 
 <template>

@@ -197,6 +197,10 @@ pub struct AppStatus {
     pub state: String,
     pub client_id: String,
     pub logs: Vec<String>,
+    pub public_udp_addr: Option<String>,
+    pub local_game_port: Option<u16>,
+    pub max_players: Option<u32>,
+    pub bedrock_port: Option<u16>,
 }
 
 pub struct AppState {
@@ -290,6 +294,9 @@ async fn start_hosting(
     let mut st = state.status.lock().unwrap();
     st.mode = "host".to_string();
     st.state = "hosting".to_string();
+    st.local_game_port = Some(port);
+    st.public_udp_addr = Some(public_ip_port.clone());
+    st.max_players = Some(30);
     st.logs.push(serde_json::to_string(&serde_json::json!({
         "type": "host_started",
         "local_port": port,
@@ -349,6 +356,26 @@ async fn connect_to_peer(
     Ok(local_ip)
 }
 
+
+#[tauri::command]
+async fn subscribe_lobby_events(
+    state: State<'_, AppState>,
+    channel: String,
+) -> Result<(), String> {
+    // Stub: SSE subscription is handled globally by SignalingClient at startup.
+    // This command exists for frontend compatibility.
+    Ok(())
+}
+
+#[tauri::command]
+async fn unsubscribe_lobby_events(
+    state: State<'_, AppState>,
+    channel: String,
+) -> Result<(), String> {
+    // Stub: SSE unsubscription placeholder.
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let client_id = format!("client-{}", rand::random::<u16>());
@@ -378,7 +405,9 @@ pub fn run() {
             stop_hosting,
             prepare_client_connect,
             connect_to_peer,
-            kick_player
+            kick_player,
+            subscribe_lobby_events,
+            unsubscribe_lobby_events
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

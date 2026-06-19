@@ -29,14 +29,14 @@ const close = () => appWindow.close();
     <div data-tauri-drag-region class="titlebar-title">
       BlockNet
     </div>
-    <div class="titlebar-controls" data-tauri-drag-region="false">
-      <button class="titlebar-button" @click="minimize" title="Свернуть">
+    <div class="titlebar-controls">
+      <button class="titlebar-button" @mousedown.stop @click="minimize" title="Свернуть">
         <div class="titlebar-icon minus-icon"></div>
       </button>
-      <button class="titlebar-button" @click="toggleMaximize" title="Развернуть">
+      <button class="titlebar-button" @mousedown.stop @click="toggleMaximize" title="Развернуть">
         <div class="titlebar-icon square-icon"></div>
       </button>
-      <button class="titlebar-button tb-danger" @click="close" title="Закрыть">
+      <button class="titlebar-button tb-danger" @mousedown.stop @click="close" title="Закрыть">
         <div class="titlebar-icon close-icon"></div>
       </button>
     </div>

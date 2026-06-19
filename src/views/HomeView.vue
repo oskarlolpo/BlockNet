@@ -64,11 +64,12 @@ const handleStartHost = async (config) => {
       enableE4mc: false,
     })
     console.log("start_hosting success");
-    emit('host-started', config.password || null)
+    emit('host-started', config.roomPassword || null)
     isHostModalOpen.value = false
   } catch (e) {
     console.error("start_hosting failed:", e);
-    alert('Ошибка: ' + e)
+    isHostModalOpen.value = false
+    alert('Ошибка запуска хоста: ' + e)
   }
 }
 

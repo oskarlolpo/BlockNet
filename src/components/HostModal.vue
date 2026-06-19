@@ -24,7 +24,7 @@ const portDetecting = ref(false)
 
 // Auto-detect port when modal opens
 watch(() => props.isOpen, async (open) => {
-  if (!open) { isHosting.value = false; return }
+  if (!open) { isHosting.value = false; roomName.value = ''; return }
   if (localGamePort.value === 25565 && !roomName.value) {
     await autoDetectPort()
   }
