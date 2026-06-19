@@ -389,7 +389,7 @@ pub fn run() {
         })
         .manage(AppState {
             status: std::sync::Mutex::new(AppStatus {
-                mode: "client".to_string(),
+                mode: "idle".to_string(),
                 state: "idle".to_string(),
                 client_id: client_id.clone(),
                 logs: vec![],
