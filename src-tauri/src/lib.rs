@@ -295,7 +295,7 @@ async fn start_hosting(
     st.mode = "host".to_string();
     st.state = "hosting".to_string();
     st.local_game_port = Some(port);
-    st.public_udp_addr = Some(public_ip_port.clone());
+    st.public_udp_addr = public_ip_port.clone();
     st.max_players = Some(30);
     st.logs.push(serde_json::to_string(&serde_json::json!({
         "type": "host_started",
@@ -359,8 +359,8 @@ async fn connect_to_peer(
 
 #[tauri::command]
 async fn subscribe_lobby_events(
-    state: State<'_, AppState>,
-    channel: String,
+    _state: State<'_, AppState>,
+    _channel: String,
 ) -> Result<(), String> {
     // Stub: SSE subscription is handled globally by SignalingClient at startup.
     // This command exists for frontend compatibility.
@@ -369,8 +369,8 @@ async fn subscribe_lobby_events(
 
 #[tauri::command]
 async fn unsubscribe_lobby_events(
-    state: State<'_, AppState>,
-    channel: String,
+    _state: State<'_, AppState>,
+    _channel: String,
 ) -> Result<(), String> {
     // Stub: SSE unsubscription placeholder.
     Ok(())
@@ -393,6 +393,10 @@ pub fn run() {
                 state: "idle".to_string(),
                 client_id: client_id.clone(),
                 logs: vec![],
+                public_udp_addr: None,
+                local_game_port: None,
+                max_players: None,
+                bedrock_port: None,
             }),
             signaling: signaling::SignalingClient::new(client_id),
         })
